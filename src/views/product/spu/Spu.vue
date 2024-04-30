@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import Category from '@/components/category/Category.vue'
 import { ref, watch, nextTick, onMounted } from 'vue'
-import { reqAllSpu, reqSkuList } from '@/api/product/spu'
+import { reqAllSpu, reqDeleteSpu, reqSkuList } from '@/api/product/spu'
 import useCategoryStore from '@/store/modules/category'
 import { SpuResponseData } from '@/api/product/spu/type';
 import type { Records, SkuFormData, SkuInfoData, Spu } from '@/api/product/spu/type'
+import { ElMessage } from 'element-plus'
 import SpuForm from './SpuForm.vue'
 import SkuForm from './SkuForm.vue'
 
@@ -92,6 +93,18 @@ const viewSku = async (row: Spu) => {
     }
 }
 
+// 删除已有的 spu
+const deleteSpu = async (row: Spu) => {
+    const res = await reqDeleteSpu(row.id as number)
+
+    if (res.code === 200) {
+        ElMessage({type: 'success', message: '删除成功'})
+        getSpu()// 刷新数据
+    } else {
+        ElMessage({type: 'error', message: '删除失败'})
+    }
+}
+
 // 自定义事件 -> 传递给子组件切换场景值 (子组件通知父组件切换场景)
 const changeScene = (sceneStr: 'data' | 'spu-form' | 'sku-form') => {
     scene.value = sceneStr
@@ -124,11 +137,15 @@ const changeScene = (sceneStr: 'data' | 'spu-form' | 'sku-form') => {
                             circle></el-button>
                         <el-button @click="viewSku(row)" title="查看 SKU" size="small" type="info" icon="View"
                             circle></el-button>
-                        <el-button title="删除属性" size="small" type="danger" icon="Delete" circle></el-button>
+                        <el-popconfirm @confirm="deleteSpu(row)" title="确定删除?">
+                            <template #reference>
+                                <el-button title="删除属性" size="small" type="danger" icon="Delete" circle></el-button>
+                            </template>
+                        </el-popconfirm>
                     </template>
                 </el-table-column>
             </el-table>
-            
+
             <!-- 分页器 -->
             <el-pagination @current-change="getSpu" @size-change="handleSizeChange" v-model:current-page="currentPage"
                 v-model:page-size="limit" :page-sizes="[3, 5, 7, 9]" background
