@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Category from '@/components/category/Category.vue'
-import { ref, watch, nextTick, onMounted } from 'vue'
+import { ref, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { reqAllSpu, reqDeleteSpu, reqSkuList } from '@/api/product/spu'
 import useCategoryStore from '@/store/modules/category'
 import { SpuResponseData } from '@/api/product/spu/type';
@@ -104,6 +104,11 @@ const deleteSpu = async (row: Spu) => {
         ElMessage({type: 'error', message: '删除失败'})
     }
 }
+
+// 路由组件销毁后, 将仓库数据进行清空
+onBeforeUnmount(() => {
+    categoryStore.$reset()
+})
 
 // 自定义事件 -> 传递给子组件切换场景值 (子组件通知父组件切换场景)
 const changeScene = (sceneStr: 'data' | 'spu-form' | 'sku-form') => {
