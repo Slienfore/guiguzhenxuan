@@ -17,6 +17,8 @@ export interface SkuData {
     // 销售属性
     skuSaleAttrValueList: Array<{ saleAttrId: number | string, saleAttrValueId: number | string }>
     skuDefaultImg: string// sku 图片默认地址
+    isSale?: number// 商品上架信息
+    id?: number// 商品ID
 }
 
 // 响应数据
