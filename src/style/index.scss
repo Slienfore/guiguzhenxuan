@@ -1,0 +1,15 @@
+@import url('./reset.scss');
+
+// 滚动条外观
+::-webkit-scrollbar {// 滚动条整体
+  width: 7px;
+}
+
+::-webkit-scrollbar-track {// 滚动轨道
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {// 指示条
+  background: #8b8b8b;
+  border-radius: 12px
+}
