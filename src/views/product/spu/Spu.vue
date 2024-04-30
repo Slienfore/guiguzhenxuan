@@ -31,20 +31,6 @@ const getSpu = async (defaultPage = 1) => {
     }
 }
 
-// 待删除
-onMounted(async () => {
-    categoryStore.categoryOneId = 2
-    categoryStore.categoryTwoId = 13
-    categoryStore.categoryThreeId = 61
-    const res: SpuResponseData = await reqAllSpu(currentPage.value, limit.value, categoryStore.categoryThreeId)
-
-    res.data.records
-    if (res.code === 200) {
-        spuList.value = res.data.records
-        total.value = res.data.total
-    }
-})
-
 watch(() => categoryStore.categoryThreeId, () => {
     if (!categoryStore.categoryThreeId) return
 
