@@ -1,18 +1,31 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { reqUserList } from '@/api/acl/user'
+import { Records, UserResponseData } from '@/api/acl/user/type'
 
+onMounted(() => {
+  getUsers()
+})
+
+const userList = ref<Records>([])
 const currentPage = ref(0)
 const limit = ref(3)
 const total = ref(0)
 
 // 获取用户信息列表
-const getUsers = (pager = 1) => {
-
+const getUsers = async (pager = 1) => {
+  currentPage.value = pager
+  const res: UserResponseData = await reqUserList(currentPage.value, limit.value)
+  console.log(res.data)
+  if (res.code === 200) {
+    total.value = res.data.total
+    userList.value = res.data.records
+  }
 }
 
 // 处理分页器显示数量
 const handleSizeChange = () => {
-
+  getUsers()
 }
 </script>
 
@@ -33,24 +46,28 @@ const handleSizeChange = () => {
   <el-divider border-style="dashed" />
 
   <el-card>
-    <el-row>
+    <el-row style="margin-bottom: 16px;">
       <el-button type="success">添加用户</el-button>
       <el-button type="danger">批量删除</el-button>
     </el-row>
-    <el-table border>
+    <el-table :data="userList" border>
       <el-table-column type="selection" align="center"></el-table-column>
-      <el-table-column label="#" align="center" width="80px"></el-table-column>
-      <el-table-column label="ID" align="center" width="120px"></el-table-column>
-      <el-table-column label="用户名字" align="center"></el-table-column>
-      <el-table-column label="用户名字" align="center"></el-table-column>
-      <el-table-column label="用户角色" align="center"></el-table-column>
-      <el-table-column label="创建时间" align="center"></el-table-column>
-      <el-table-column label="更新时间" align="center"></el-table-column>
+      <el-table-column type="index" label="#" align="center" width="80px"></el-table-column>
+      <el-table-column prop="id" label="ID" align="center" width="120px"></el-table-column>
+      <el-table-column prop="username" label="用户名字" align="center" show-overflow-tooltip></el-table-column>
+      <el-table-column prop="name" label="用户名字" align="center" show-overflow-tooltip></el-table-column>
+      <el-table-column prop="roleName" label="用户角色" align="center" show-overflow-tooltip> </el-table-column>
+      <el-table-column prop="createTime" label="创建时间" align="center" show-overflow-tooltip></el-table-column>
+      <el-table-column prop="updateTime" label="更新时间" align="center" show-overflow-tooltip></el-table-column>
       <el-table-column label="操作" align="center" width="350px">
         <template #="{ row }">
-          <el-button>角色分配</el-button>
-          <el-button type="warning" icon="Edit" circle></el-button>
-          <el-button type="danger" icon="Delete" circle></el-button>
+          <el-button type="primary">角色分配</el-button>
+          <el-button title="编辑角色" type="warning" icon="Edit" circle></el-button>
+          <el-popconfirm title="您确定删除角色?">
+            <template #reference>
+              <el-button type="danger" icon="Delete" circle></el-button>
+            </template>
+          </el-popconfirm>
         </template>
       </el-table-column>
     </el-table>
