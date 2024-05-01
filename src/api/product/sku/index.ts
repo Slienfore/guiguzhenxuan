@@ -6,6 +6,7 @@ enum API {
     ON_SALE_URL = '/admin/product/onSale/',// 上架
     UN_SALE_URL = '/admin/product/cancelSale/',// 下架
     SKU_DETAIL_INFO_URL = '/admin/product/getSkuInfo/',// 获取商品详情接口
+    DELETE_SKU_URL = '/admin/product/deleteSku/',// 删除已有的商品
 }
 
 // 获取 SKU 数据列表
@@ -19,3 +20,6 @@ export const reqUnSaleSku = (skuId: number) => request.get<any, any>(API.UN_SALE
 
 // 获取商品详情信息
 export const reqSkuDetailInfo = (skuId: number) => request.get<any, SkuDetailInfoResponseData>(API.SKU_DETAIL_INFO_URL + skuId)
+
+// 删除已有的商品
+export const reqDeleteSku = (skuId: number) => request.delete<any, any>(API.DELETE_SKU_URL + skuId)

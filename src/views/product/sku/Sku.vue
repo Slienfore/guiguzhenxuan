@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import type { SkuData, SkuDetailInfoResponseData, SkuResponseData } from '@/api/product/sku/type'
-import { reqSkuList, reqOnSaleSku, reqUnSaleSku, reqSkuDetailInfo } from '@/api/product/sku';
+import { reqSkuList, reqOnSaleSku, reqUnSaleSku, reqSkuDetailInfo, reqDeleteSku } from '@/api/product/sku'
 import { ElMessage } from 'element-plus';
 
 const currentPage = ref(1)
@@ -69,6 +69,18 @@ const viewSku = async (row: SkuData) => {
     skuInfo.value = res.data
 }
 
+// 删除商品
+const deleteSku = async (row: SkuData) => {
+    const res = await reqDeleteSku(row.id as number)
+
+    if (res.code === 200) {
+        // 判断删除后, 当前页面是否还有数据, 有的话则留在本页, 没有的话就请求上一页的数据
+        getSku(skuList.value.length > 1 ? currentPage.value : currentPage.value - 1)
+        ElMessage({ type: 'success', message: '删除成功' })
+    } else {
+        ElMessage({ type: 'error', message: '删除失败' })
+    }
+}
 
 </script>
 
@@ -96,7 +108,11 @@ const viewSku = async (row: SkuData) => {
                         style="margin: 5px"></el-button>
                     <el-button @click="viewSku(row)" title="查看" type="info" icon="View" circle
                         style="margin: 5px"></el-button>
-                    <el-button title="删除" type="danger" icon="Delete" circle style="margin: 5px"></el-button>
+                    <el-popconfirm @confirm="deleteSku(row)" title="您确定删除该商品">
+                        <template #reference>
+                            <el-button title="删除" type="danger" icon="Delete" circle style="margin: 5px"></el-button>
+                        </template>
+                    </el-popconfirm>
                 </template>
             </el-table-column>
         </el-table>
@@ -140,7 +156,8 @@ const viewSku = async (row: SkuData) => {
             <el-col :span="18">
                 <el-carousel :interval="4000" type="card" height="200px">
                     <el-carousel-item v-for="item in skuInfo.skuImageList" :key="item.id">
-                        <el-image :src="item.imgUrl" style="width: 150px; height: 150px; border-radius: 12px;"></el-image>
+                        <el-image :src="item.imgUrl"
+                            style="width: 150px; height: 150px; border-radius: 12px;"></el-image>
                     </el-carousel-item>
                 </el-carousel>
             </el-col>
@@ -156,13 +173,14 @@ const viewSku = async (row: SkuData) => {
         .el-col {
             line-height: 2;
             letter-spacing: 1.2;
+
             .el-tag {
                 margin: 2px 5px;
             }
         }
     }
 
-    .el-carousel__item  {
+    .el-carousel__item {
         display: flex;
         align-items: center;
         justify-content: center;
