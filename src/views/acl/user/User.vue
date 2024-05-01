@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { reqUserList } from '@/api/acl/user'
+import { ref, reactive, onMounted } from 'vue'
+import { reqUserList, reqAddOrUpdateUser } from '@/api/acl/user'
 import { Records, User, UserResponseData } from '@/api/acl/user/type'
+import { ElMessage } from 'element-plus';
 
 onMounted(() => {
   getUsers()
@@ -28,16 +29,37 @@ const handleSizeChange = () => {
   getUsers()
 }
 
-const drawer = ref<boolean>(true)
+const userParams = reactive<User>({ username: '', name: '', password: '' })
+const drawer = ref<boolean>(false)
 
 // 添加用户
 const addUser = () => {
+  // 清空表单数据
+  Object.assign(userParams, { username: '', name: '', password: '' })
   drawer.value = true
 }
 
 // 更新用户
 const updateUser = (row: User) => {
   drawer.value = true
+}
+
+// 保存表单
+const save = async () => {
+  const res = await reqAddOrUpdateUser(userParams)
+  
+  if (res.code === 200) {
+    await getUsers()
+    ElMessage({ type: 'success', message: `${userParams.id ? '修改' : '添加'}成功` })
+    drawer.value = false
+  } else {
+    ElMessage({ type: 'error', message: `${userParams.id ? '修改' : '添加'}失败` })
+  }
+}
+
+// 取消操作drawer
+const cancel = () => {
+  drawer.value = false
 }
 </script>
 
@@ -96,18 +118,18 @@ const updateUser = (row: User) => {
   <el-drawer v-model="drawer" title="添加用户" size="40%">
     <el-form>
       <el-form-item label="用户姓名">
-        <el-input placeholder="请输入..."></el-input>
+        <el-input v-model="userParams.username" placeholder="请输入..."></el-input>
       </el-form-item>
       <el-form-item label="用户昵称">
-        <el-input placeholder="请输入..."></el-input>
+        <el-input v-model="userParams.name" placeholder="请输入..."></el-input>
       </el-form-item>
       <el-form-item label="用户密码">
-        <el-input placeholder="请输入..."></el-input>
+        <el-input v-model="userParams.password" placeholder="请输入..."></el-input>
       </el-form-item>
     </el-form>
     <template #footer>
-        <el-button type="primary">确定</el-button>
-        <el-button>取消</el-button>
+      <el-button @click="save" type="primary">确定</el-button>
+      <el-button @click="cancel">取消</el-button>
     </template>
   </el-drawer>
 </template>

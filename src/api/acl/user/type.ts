@@ -7,6 +7,7 @@ export interface ResponseData {
 export interface User {
     id?: string | number
     username?: string
+    name?: string
     password?: string
     phone?: string
     roleName?: string
