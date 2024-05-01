@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, nextTick } from 'vue'
 import { reqUserList, reqAddOrUpdateUser } from '@/api/acl/user'
 import { Records, User, UserResponseData } from '@/api/acl/user/type'
 import { ElMessage } from 'element-plus';
@@ -34,6 +34,13 @@ const drawer = ref<boolean>(false)
 
 // 添加用户
 const addUser = () => {
+  // 初次加载时候, 页面上还没有表单组件 -> nextTick
+  nextTick(() => {// 重置表单校验规则
+    form.value.clearValidate('username')
+    form.value.clearValidate('name')
+    form.value.clearValidate('password')
+  })
+  
   // 清空表单数据
   Object.assign(userParams, { username: '', name: '', password: '' })
   drawer.value = true
@@ -44,10 +51,14 @@ const updateUser = (row: User) => {
   drawer.value = true
 }
 
+const form = ref()// 表单组件
 // 保存表单
 const save = async () => {
+  // 表单是否通过校验规则 (返回 Promise)
+  await form.value.validate()
+
   const res = await reqAddOrUpdateUser(userParams)
-  
+
   if (res.code === 200) {
     await getUsers()
     ElMessage({ type: 'success', message: `${userParams.id ? '修改' : '添加'}成功` })
@@ -60,6 +71,38 @@ const save = async () => {
 // 取消操作drawer
 const cancel = () => {
   drawer.value = false
+}
+
+// 自定义表单校验规则
+const validateUserName = (rule: any, value: string, callback: Function) => {
+  if (value.trim().length >= 5) {
+    callback()
+  } else {
+    callback(new Error('用户名称至少为5位'))
+  }
+}
+
+const validateName = (rule: any, value: string, callback: Function) => {
+  if (value.trim().length >= 5) {
+    callback()
+  } else {
+    callback(new Error('用户昵称至少为5位'))
+  }
+}
+
+const validatePassword = (rule: any, value: string, callback: Function) => {
+  if (value.trim().length >= 6) {
+    callback()
+  } else {
+    callback(new Error('密码至少为6位'))
+  }
+}
+
+// 表单校验规则
+const rules = {
+  username: [{ validator: validateUserName, required: true, trigger: 'blur' }],
+  name: [{ validator: validateName, required: true, trigger: 'blur' }],
+  password: [{ validator: validatePassword, required: true, trigger: 'blur' }]
 }
 </script>
 
@@ -116,14 +159,14 @@ const cancel = () => {
 
   <!-- 添加用户 | 修改用户 -->
   <el-drawer v-model="drawer" title="添加用户" size="40%">
-    <el-form>
-      <el-form-item label="用户姓名">
+    <el-form ref="form" :model="userParams" :rules="rules">
+      <el-form-item prop="username" label="用户姓名">
         <el-input v-model="userParams.username" placeholder="请输入..."></el-input>
       </el-form-item>
-      <el-form-item label="用户昵称">
+      <el-form-item prop="name" label="用户昵称">
         <el-input v-model="userParams.name" placeholder="请输入..."></el-input>
       </el-form-item>
-      <el-form-item label="用户密码">
+      <el-form-item prop="password" label="用户密码">
         <el-input v-model="userParams.password" placeholder="请输入..."></el-input>
       </el-form-item>
     </el-form>
