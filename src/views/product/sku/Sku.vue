@@ -53,6 +53,15 @@ const updateSku = () => {
     ElMessage({ type: 'success', message: '开发中...' })
 }
 
+// 控制抽屉组件
+const drawer = ref<boolean>(true)
+
+// 查看 sku 信息
+const viewSku = (row: SkuData) => {
+    drawer.value = true
+}
+
+
 </script>
 
 <template>
@@ -77,7 +86,8 @@ const updateSku = () => {
                         circle style="margin: 5px"></el-button>
                     <el-button @click="updateSku" title="编辑" type="warning" icon="Edit" circle
                         style="margin: 5px"></el-button>
-                    <el-button title="查看" type="info" icon="View" circle style="margin: 5px"></el-button>
+                    <el-button @click="viewSku(row)" title="查看" type="info" icon="View" circle
+                        style="margin: 5px"></el-button>
                     <el-button title="删除" type="danger" icon="Delete" circle style="margin: 5px"></el-button>
                 </template>
             </el-table-column>
@@ -90,6 +100,57 @@ const updateSku = () => {
             v-model:page-size="limit" :page-sizes="[3, 5, 7, 9]" background layout="prev, pager, next, ->, sizes, total"
             :total="total" />
     </el-card>
+
+    <el-drawer v-model="drawer" title="查看商品详情" size="40%">
+        <el-row>
+            <el-col :span="6">名称</el-col>
+            <el-col :span="18">华为 mate20</el-col>
+        </el-row>
+        <el-row>
+            <el-col :span="6">描述</el-col>
+            <el-col :span="18">Apple iPhone 12 Pro</el-col>
+        </el-row>
+        <el-row>
+            <el-col :span="6">价格</el-col>
+            <el-col :span="18">8199</el-col>
+        </el-row>
+        <el-row>
+            <el-col :span="6">平台属性</el-col>
+            <el-col :span="18">
+                <el-tag>苹果</el-tag>
+                <el-tag>苹果</el-tag>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :span="6">销售属性</el-col>
+            <el-col :span="18">
+                <el-tag>白色</el-tag>
+                <el-tag>白色</el-tag>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :span="6">商品图片</el-col>
+            <el-col :span="18">
+                <el-carousel :interval="4000" type="card" height="200px">
+                    <el-carousel-item v-for="item in 6" :key="item">
+                        <h3 text="2xl" justify="center">{{ item }}</h3>
+                    </el-carousel-item>
+                </el-carousel>
+            </el-col>
+        </el-row>
+    </el-drawer>
 </template>
 
-<style scoped></style>
+<style scoped lang="scss">
+.el-drawer {
+    .el-row {
+        margin-bottom: 60px;
+
+        .el-col {
+            .el-tag {
+                margin: 0 5px;
+            }
+        }
+    }
+}
+</style>
