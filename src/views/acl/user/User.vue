@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { reqUserList } from '@/api/acl/user'
-import { Records, UserResponseData } from '@/api/acl/user/type'
+import { Records, User, UserResponseData } from '@/api/acl/user/type'
 
 onMounted(() => {
   getUsers()
@@ -27,6 +27,18 @@ const getUsers = async (pager = 1) => {
 const handleSizeChange = () => {
   getUsers()
 }
+
+const drawer = ref<boolean>(true)
+
+// 添加用户
+const addUser = () => {
+  drawer.value = true
+}
+
+// 更新用户
+const updateUser = (row: User) => {
+  drawer.value = true
+}
 </script>
 
 <template>
@@ -47,7 +59,7 @@ const handleSizeChange = () => {
 
   <el-card>
     <el-row style="margin-bottom: 16px;">
-      <el-button type="success">添加用户</el-button>
+      <el-button @click="addUser" type="success">添加用户</el-button>
       <el-button type="danger">批量删除</el-button>
     </el-row>
     <el-table :data="userList" border>
@@ -62,7 +74,7 @@ const handleSizeChange = () => {
       <el-table-column label="操作" align="center" width="350px">
         <template #="{ row }">
           <el-button type="primary">角色分配</el-button>
-          <el-button title="编辑角色" type="warning" icon="Edit" circle></el-button>
+          <el-button @click="updateUser(row)" title="编辑角色" type="warning" icon="Edit" circle></el-button>
           <el-popconfirm title="您确定删除角色?">
             <template #reference>
               <el-button type="danger" icon="Delete" circle></el-button>
@@ -79,6 +91,25 @@ const handleSizeChange = () => {
       v-model:page-size="limit" :page-sizes="[3, 5, 7, 9]" background layout="prev, pager, next, ->, sizes, total"
       :total="total" />
   </el-card>
+
+  <!-- 添加用户 | 修改用户 -->
+  <el-drawer v-model="drawer" title="添加用户" size="40%">
+    <el-form>
+      <el-form-item label="用户姓名">
+        <el-input placeholder="请输入..."></el-input>
+      </el-form-item>
+      <el-form-item label="用户昵称">
+        <el-input placeholder="请输入..."></el-input>
+      </el-form-item>
+      <el-form-item label="用户密码">
+        <el-input placeholder="请输入..."></el-input>
+      </el-form-item>
+    </el-form>
+    <template #footer>
+        <el-button type="primary">确定</el-button>
+        <el-button>取消</el-button>
+    </template>
+  </el-drawer>
 </template>
 
 <style scoped lang="scss">
