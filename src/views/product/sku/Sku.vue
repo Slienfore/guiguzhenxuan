@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import type { SkuData, SkuResponseData } from '@/api/product/sku/type'
-import { reqSkuList, reqOnSaleSku, reqUnSaleSku } from '@/api/product/sku';
+import type { SkuData, SkuDetailInfoResponseData, SkuResponseData } from '@/api/product/sku/type'
+import { reqSkuList, reqOnSaleSku, reqUnSaleSku, reqSkuDetailInfo } from '@/api/product/sku';
 import { ElMessage } from 'element-plus';
 
 const currentPage = ref(1)
@@ -54,11 +54,19 @@ const updateSku = () => {
 }
 
 // 控制抽屉组件
-const drawer = ref<boolean>(true)
+const drawer = ref<boolean>(false)
+// 商品详情信息
+const skuInfo = ref<SkuData>({
+    category3Id: '', spuId: '', tmId: '', skuName: '', price: '', weight: '', skuDesc: '',
+    skuAttrValueList: [], skuSaleAttrValueList: [], skuDefaultImg: ''
+})
 
 // 查看 sku 信息
-const viewSku = (row: SkuData) => {
+const viewSku = async (row: SkuData) => {
     drawer.value = true
+    // 获取商品详情信息
+    const res: SkuDetailInfoResponseData = await reqSkuDetailInfo(row.id as number)
+    skuInfo.value = res.data
 }
 
 
@@ -104,36 +112,35 @@ const viewSku = (row: SkuData) => {
     <el-drawer v-model="drawer" title="查看商品详情" size="40%">
         <el-row>
             <el-col :span="6">名称</el-col>
-            <el-col :span="18">华为 mate20</el-col>
+            <el-col :span="18">{{ skuInfo.skuName }}</el-col>
         </el-row>
         <el-row>
             <el-col :span="6">描述</el-col>
-            <el-col :span="18">Apple iPhone 12 Pro</el-col>
+            <el-col :span="18">{{ skuInfo.skuDesc }}</el-col>
         </el-row>
         <el-row>
             <el-col :span="6">价格</el-col>
-            <el-col :span="18">8199</el-col>
+            <el-col :span="18">￥ {{ skuInfo.price }}</el-col>
         </el-row>
         <el-row>
             <el-col :span="6">平台属性</el-col>
             <el-col :span="18">
-                <el-tag>苹果</el-tag>
-                <el-tag>苹果</el-tag>
+                <el-tag v-for="item in skuInfo.skuAttrValueList" :key="item.id">{{ item.valueName }}</el-tag>
             </el-col>
         </el-row>
         <el-row>
             <el-col :span="6">销售属性</el-col>
             <el-col :span="18">
-                <el-tag>白色</el-tag>
-                <el-tag>白色</el-tag>
+                <el-tag v-for="item in skuInfo.skuSaleAttrValueList" :key="item.id">{{ item.saleAttrValueName
+                    }}</el-tag>
             </el-col>
         </el-row>
         <el-row>
             <el-col :span="6">商品图片</el-col>
             <el-col :span="18">
                 <el-carousel :interval="4000" type="card" height="200px">
-                    <el-carousel-item v-for="item in 6" :key="item">
-                        <h3 text="2xl" justify="center">{{ item }}</h3>
+                    <el-carousel-item v-for="item in skuInfo.skuImageList" :key="item.id">
+                        <el-image :src="item.imgUrl" style="width: 150px; height: 150px; border-radius: 12px;"></el-image>
                     </el-carousel-item>
                 </el-carousel>
             </el-col>
@@ -147,10 +154,18 @@ const viewSku = (row: SkuData) => {
         margin-bottom: 60px;
 
         .el-col {
+            line-height: 2;
+            letter-spacing: 1.2;
             .el-tag {
-                margin: 0 5px;
+                margin: 2px 5px;
             }
         }
+    }
+
+    .el-carousel__item  {
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 }
 </style>
