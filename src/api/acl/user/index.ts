@@ -7,6 +7,8 @@ enum API {
     UPDATE_USER_URL = '/admin/acl/user/update', // 修改用户
     USER_ALL_ROLE_URL = '/admin/acl/user/toAssign/',// 获取当前帐号的职位信息
     ASSIGN_ROLE_URL = '/admin/acl/user/doAssignRole',// 分配角色
+    DELETE_USER_URL = '/admin/acl/user/remove/',// 删除用户
+    DELETE_BATCH_URL = '/admin/acl/user/batchRemove',// 批量删除用户
 }
 
 // 系统所有用户列表
@@ -26,3 +28,9 @@ export const reqGetUserRoles = (userId: number) => request.get<any, AllRoleRespo
 
 // 分配角色
 export const reqAssignRole = (data: AssignRoleData) => request.post<any, any>(API.ASSIGN_ROLE_URL, data)
+
+// 删除用户
+export const reqDeleteUser = (userId: number) => request.delete<any, any>(API.DELETE_USER_URL + userId)
+
+// 批量删除用户
+export const reqDeleteBatchUser = (idList: number[]) => request.delete<any, any>(API.DELETE_BATCH_URL, {data: idList})

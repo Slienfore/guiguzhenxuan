@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, nextTick } from 'vue'
-import { reqUserList, reqAddOrUpdateUser, reqGetUserRoles, reqAssignRole } from '@/api/acl/user'
+import { reqUserList, reqAddOrUpdateUser, reqGetUserRoles, reqAssignRole, reqDeleteUser, reqDeleteBatchUser } from '@/api/acl/user'
 import { AllRoleResponseData, AssignRoleData, Records, RoleList, User, UserResponseData } from '@/api/acl/user/type'
 import { ElMessage } from 'element-plus';
 
@@ -166,6 +166,34 @@ const saveUserRole = async () => {
     ElMessage({ type: 'error', message: '分配失败' })
   }
 }
+
+// 删除用户
+const deleteUser = async (userId: number) => {
+  const res = await reqDeleteUser(userId)
+
+  if (res.code === 200) {
+    await getUsers(userList.value.length > 1 ? currentPage.value : currentPage.value - 1)// 删除后是否回到当前页面
+    ElMessage({ type: 'success', message: '删除成功' })
+  }
+}
+
+// 已选择用户的 id 列表
+const selectedUsers = ref<User[]>([])
+// 表格 复选框勾选时候 变化
+const selectChange = (val: User[]) => {
+  selectedUsers.value = val
+}
+
+// 批量删除用户
+const deleteBatchUser = async () => {
+  const idList: number[] = selectedUsers.value.map(item => item.id as number)
+  const res = await reqDeleteBatchUser(idList)
+
+  if (res.code === 200) {
+    await getUsers(userList.value.length > 1 ? currentPage.value : currentPage.value - 1)// 删除后是否回到当前页面
+    ElMessage({ type: 'success', message: '删除成功' })
+  }
+}
 </script>
 
 <template>
@@ -187,9 +215,9 @@ const saveUserRole = async () => {
   <el-card>
     <el-row style="margin-bottom: 16px;">
       <el-button @click="addUser" type="success">添加用户</el-button>
-      <el-button type="danger">批量删除</el-button>
+      <el-button @click="deleteBatchUser" :disabled="!selectedUsers.length" type="danger">批量删除</el-button>
     </el-row>
-    <el-table :data="userList" border>
+    <el-table @selection-change="selectChange" :data="userList" border>
       <el-table-column type="selection" align="center"></el-table-column>
       <el-table-column type="index" label="#" align="center" width="80px"></el-table-column>
       <el-table-column prop="id" label="ID" align="center" width="120px"></el-table-column>
@@ -202,7 +230,7 @@ const saveUserRole = async () => {
         <template #="{ row }">
           <el-button @click="roleAllocation(row)" type="primary">角色分配</el-button>
           <el-button @click="updateUser(row)" title="编辑角色" type="warning" icon="Edit" circle></el-button>
-          <el-popconfirm title="您确定删除角色?">
+          <el-popconfirm @confirm="deleteUser(row.id)" title="您确定删除该名用户吗?">
             <template #reference>
               <el-button type="danger" icon="Delete" circle></el-button>
             </template>
