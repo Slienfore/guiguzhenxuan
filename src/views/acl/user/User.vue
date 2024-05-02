@@ -40,7 +40,7 @@ const addUser = () => {
     form.value.clearValidate('name')
     form.value.clearValidate('password')
   })
-  
+
   // 清空表单数据
   Object.assign(userParams, { username: '', name: '', password: '' })
   drawer.value = true
@@ -48,7 +48,15 @@ const addUser = () => {
 
 // 更新用户
 const updateUser = (row: User) => {
+  // 初次加载时候, 页面上还没有表单组件 -> nextTick
+  nextTick(() => {// 重置表单校验规则
+    form.value.clearValidate('username')
+    form.value.clearValidate('name')
+  })
+
   drawer.value = true
+  // 将当前用户信息传递到表单
+  Object.assign(userParams, row)
 }
 
 const form = ref()// 表单组件
@@ -60,7 +68,10 @@ const save = async () => {
   const res = await reqAddOrUpdateUser(userParams)
 
   if (res.code === 200) {
-    await getUsers()
+    await getUsers(userParams.id ? currentPage.value : 1)// 有 ID -> 修改用户, 留在当前页
+    // 避免修改当前账号信息依旧会保持登陆状态, 修改完用户后需要进行全局刷新 -> 将会触发请求拦截器, 判断当前登录用户
+    window.location.reload()
+
     ElMessage({ type: 'success', message: `${userParams.id ? '修改' : '添加'}成功` })
     drawer.value = false
   } else {
@@ -158,7 +169,7 @@ const rules = {
   </el-card>
 
   <!-- 添加用户 | 修改用户 -->
-  <el-drawer v-model="drawer" title="添加用户" size="40%">
+  <el-drawer v-model="drawer" :title="`${userParams.id ? '修改' : '添加'}用户`" size="40%">
     <el-form ref="form" :model="userParams" :rules="rules">
       <el-form-item prop="username" label="用户姓名">
         <el-input v-model="userParams.username" placeholder="请输入..."></el-input>
@@ -166,7 +177,8 @@ const rules = {
       <el-form-item prop="name" label="用户昵称">
         <el-input v-model="userParams.name" placeholder="请输入..."></el-input>
       </el-form-item>
-      <el-form-item prop="password" label="用户密码">
+      <!--更新用户时候, 有ID, 不显示密码框-->
+      <el-form-item v-if="!userParams.id" prop="password" label="用户密码">
         <el-input v-model="userParams.password" placeholder="请输入..."></el-input>
       </el-form-item>
     </el-form>
