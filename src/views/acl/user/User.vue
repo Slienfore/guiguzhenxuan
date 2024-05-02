@@ -115,6 +115,30 @@ const rules = {
   name: [{ validator: validateName, required: true, trigger: 'blur' }],
   password: [{ validator: validatePassword, required: true, trigger: 'blur' }]
 }
+
+// 职位分配抽屉
+const roleDrawer = ref(true)
+// 职位分配
+const roleAllocation = (row: User) => {
+
+}
+
+const checkAll = ref(false)// 是否全选
+const isIndeterminate = ref(true)// 全选框 不确定状态
+const allRole = ref(['销售', '前台', '财务'])// 所有职位
+const userRole = ref(['销售'])// 已选职位
+// @change 全选
+const handleCheckAllChange = (val: boolean) => {// 全选激活 -> 已选的就是全部
+  userRole.value = val ? allRole.value : []
+  isIndeterminate.value = false// 更改全选按钮不确定状态
+}
+// 当个复选框变化
+const handleSingleCheckBoxChange = (val: string[]) => {// 全部单个复选框选定之后, 将会触发全选
+  isIndeterminate.value = allRole.value.length === userRole.value.length
+  const checkedClt = val.length// 已经选择的数组
+  checkAll.value = checkedClt === allRole.value.length
+  isIndeterminate.value = !checkAll.value
+}
 </script>
 
 <template>
@@ -149,7 +173,7 @@ const rules = {
       <el-table-column prop="updateTime" label="更新时间" align="center" show-overflow-tooltip></el-table-column>
       <el-table-column label="操作" align="center" width="350px">
         <template #="{ row }">
-          <el-button type="primary">角色分配</el-button>
+          <el-button @click="roleAllocation(row)" type="primary">角色分配</el-button>
           <el-button @click="updateUser(row)" title="编辑角色" type="warning" icon="Edit" circle></el-button>
           <el-popconfirm title="您确定删除角色?">
             <template #reference>
@@ -186,6 +210,25 @@ const rules = {
       <el-button @click="save" type="primary">确定</el-button>
       <el-button @click="cancel">取消</el-button>
     </template>
+  </el-drawer>
+
+  <!-- 职位分配 -->
+  <el-drawer v-model="roleDrawer" title="角色分配">
+    <el-form label-width="80px">
+      <el-form-item label="用户姓名">
+        <el-input disabled v-model="userParams.username"></el-input>
+      </el-form-item>
+      <el-form-item label="职位列表">
+        <!-- 全选 -->
+        <el-checkbox @change="handleCheckAllChange" v-model="checkAll" :indeterminate="isIndeterminate">全选</el-checkbox>
+      </el-form-item>
+      <el-form-item>
+        <!-- 复选框组 -->
+        <el-checkbox-group @change="handleSingleCheckBoxChange" v-model="userRole">
+          <el-checkbox v-for="role in allRole" :key="role" :label="role">{{ role }}</el-checkbox>
+        </el-checkbox-group>
+      </el-form-item>
+    </el-form>
   </el-drawer>
 </template>
 
