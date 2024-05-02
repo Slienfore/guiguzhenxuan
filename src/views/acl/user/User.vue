@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, nextTick } from 'vue'
-import { reqUserList, reqAddOrUpdateUser } from '@/api/acl/user'
-import { Records, User, UserResponseData } from '@/api/acl/user/type'
+import { reqUserList, reqAddOrUpdateUser, reqGetUserRoles, reqAssignRole } from '@/api/acl/user'
+import { AllRoleResponseData, AssignRoleData, Records, RoleList, User, UserResponseData } from '@/api/acl/user/type'
 import { ElMessage } from 'element-plus';
 
 onMounted(() => {
@@ -117,16 +117,25 @@ const rules = {
 }
 
 // 职位分配抽屉
-const roleDrawer = ref(true)
-// 职位分配
-const roleAllocation = (row: User) => {
-
-}
-
+const roleDrawer = ref(false)
 const checkAll = ref(false)// 是否全选
 const isIndeterminate = ref(true)// 全选框 不确定状态
-const allRole = ref(['销售', '前台', '财务'])// 所有职位
-const userRole = ref(['销售'])// 已选职位
+const allRole = ref<RoleList>([])// 所有职位
+const userRole = ref<RoleList>([])// 已选职位
+
+// 职位分配
+const roleAllocation = async (row: User) => {
+  Object.assign(userParams, row)// 表单中需要进行展示用户的信息
+  const res: AllRoleResponseData = await reqGetUserRoles(row.id as number)
+
+  if (res.code === 200) {
+    allRole.value = res.data.allRolesList
+    userRole.value = res.data.assignRoles
+  }
+
+  roleDrawer.value = true// 打开抽屉
+}
+
 // @change 全选
 const handleCheckAllChange = (val: boolean) => {// 全选激活 -> 已选的就是全部
   userRole.value = val ? allRole.value : []
@@ -138,6 +147,24 @@ const handleSingleCheckBoxChange = (val: string[]) => {// 全部单个复选框�
   const checkedClt = val.length// 已经选择的数组
   checkAll.value = checkedClt === allRole.value.length
   isIndeterminate.value = !checkAll.value
+}
+
+// 分配职位请求
+const saveUserRole = async () => {
+  const data: AssignRoleData = {
+    userId: userParams.id as number,
+    roleIdList: userRole.value.map(item => item.id as number)// 收集roleID
+  }
+
+  const res = await reqAssignRole(data)
+  if (res.code === 200) {
+    await getUsers(currentPage.value)// 刷新数据(留在当前页)
+
+    ElMessage({ type: 'success', message: '分配成功' })
+    roleDrawer.value = false
+  } else {
+    ElMessage({ type: 'error', message: '分配失败' })
+  }
 }
 </script>
 
@@ -225,10 +252,14 @@ const handleSingleCheckBoxChange = (val: string[]) => {// 全部单个复选框�
       <el-form-item>
         <!-- 复选框组 -->
         <el-checkbox-group @change="handleSingleCheckBoxChange" v-model="userRole">
-          <el-checkbox v-for="role in allRole" :key="role" :label="role">{{ role }}</el-checkbox>
+          <el-checkbox v-for="role in allRole" :key="role" :label="role">{{ role.roleName }}</el-checkbox>
         </el-checkbox-group>
       </el-form-item>
     </el-form>
+    <template #footer>
+      <el-button @click="saveUserRole" type="primary">确定</el-button>
+      <el-button @click="roleDrawer = false">取消</el-button>
+    </template>
   </el-drawer>
 </template>
 

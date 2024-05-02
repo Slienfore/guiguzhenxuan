@@ -27,3 +27,28 @@ export interface UserResponseData extends ResponseData {
         pages: number
     }
 }
+
+// 职位对象
+export interface RoleData {
+    id?: number
+    roleName: string
+    createTime?: string
+    updateTime?: string
+    remark?: null
+}
+// 所有职位列表
+export type RoleList = Array<RoleData>
+
+// 用户职位响应数据
+export interface AllRoleResponseData extends ResponseData {
+    data: {
+        assignRoles: RoleList// 分配的职位
+        allRolesList: RoleList// 所有职位
+    }
+}
+
+// 分配角色携带参数
+export interface AssignRoleData {
+    roleIdList: number[]
+    userId: number
+}
