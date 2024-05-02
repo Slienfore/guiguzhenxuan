@@ -3,6 +3,7 @@ import { ref, reactive, onMounted, nextTick } from 'vue'
 import { reqUserList, reqAddOrUpdateUser, reqGetUserRoles, reqAssignRole, reqDeleteUser, reqDeleteBatchUser } from '@/api/acl/user'
 import { AllRoleResponseData, AssignRoleData, Records, RoleList, User, UserResponseData } from '@/api/acl/user/type'
 import { ElMessage } from 'element-plus';
+import useLayoutSettingStore from '@/store/modules/setting'
 
 onMounted(() => {
   getUsers()
@@ -16,7 +17,7 @@ const total = ref(0)
 // 获取用户信息列表
 const getUsers = async (pager = 1) => {
   currentPage.value = pager
-  const res: UserResponseData = await reqUserList(currentPage.value, limit.value)
+  const res: UserResponseData = await reqUserList(currentPage.value, limit.value, keyword.value)
   console.log(res.data)
   if (res.code === 200) {
     total.value = res.data.total
@@ -194,18 +195,36 @@ const deleteBatchUser = async () => {
     ElMessage({ type: 'success', message: '删除成功' })
   }
 }
+
+// 搜索关键词
+const keyword = ref<string>('')
+
+// 搜索
+const search = async () => {
+  await getUsers()
+  // 搜索完成之后 清空关键词
+  keyword.value = ''
+}
+
+// layout 组件的setting仓库, 其中 refresh 控制页面刷新, 在 Main 组件设置监听 refresh 属性了
+const settingStore = useLayoutSettingStore()
+// 重置页面 -> 刷新
+const reset = () => {
+  settingStore.refresh = !settingStore.refresh// 进行刷新
+}
+
 </script>
 
 <template>
   <el-card class="top-wrap">
     <el-form inline class="form">
       <el-form-item label="用户名">
-        <el-input placeholder="请输入搜索内容..." clearable></el-input>
+        <el-input v-model="keyword" placeholder="请输入搜索内容..." clearable></el-input>
       </el-form-item>
 
       <el-form-item>
-        <el-button type="primary">查找</el-button>
-        <el-button>重置</el-button>
+        <el-button @click="search" :disabled="!keyword" type="primary">查找</el-button>
+        <el-button @click="reset">重置</el-button>
       </el-form-item>
     </el-form>
   </el-card>

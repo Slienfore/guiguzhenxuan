@@ -11,8 +11,8 @@ enum API {
     DELETE_BATCH_URL = '/admin/acl/user/batchRemove',// 批量删除用户
 }
 
-// 系统所有用户列表
-export const reqUserList = (page: number, limit: number) => request.get<any, UserResponseData>(API.USER_LIST_URL + `${page}/${limit}`)
+// 系统所有用户列表 -> 搜索用户同通过 query 进行传递
+export const reqUserList = (page: number, limit: number, username: string) => request.get<any, UserResponseData>(API.USER_LIST_URL + `${page}/${limit}/?username=${username}`)
 
 // 更新 | 添加用户
 export const reqAddOrUpdateUser = (data: User) => {
