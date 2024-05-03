@@ -1,18 +1,47 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { reqAllRolesList } from '@/api/acl/role';
+import type { RoleData, RoleResponseData } from '@/api/acl/role/type';
+import useLayoutSettingStore from '@/store/modules/setting';
+import { ref, onMounted } from 'vue'
+
+onMounted(() => {
+    getRoles()
+})
 
 const currentPage = ref(0)
 const limit = ref(10)
 const total = ref(0)
+const keyword = ref('')// 搜索关键词
+
+const roleList = ref<RoleData[]>([])
 
 // 获取所有角色列表
-const getRoles = (pager = 1) => {
+const getRoles = async (pager = 1) => {
     currentPage.value = pager
+
+    const res: RoleResponseData = await reqAllRolesList(currentPage.value, limit.value, keyword.value)
+
+    if (res.code === 200) {
+        roleList.value = res.data.records
+        total.value = res.data.total
+    }
 }
 
 // 分页数据变化
 const handleSizeChange = () => {
     getRoles()
+}
+
+// 搜索功能
+const search = () => {
+    getRoles()
+    keyword.value = ''
+}
+
+const layoutSettingStore = useLayoutSettingStore()
+// 重置功能
+const reset = () => {
+    layoutSettingStore.refresh = !layoutSettingStore.refresh// 进行刷新
 }
 </script>
 
@@ -20,11 +49,11 @@ const handleSizeChange = () => {
     <el-card>
         <el-form class="form">
             <el-form-item label="职位搜索">
-                <el-input></el-input>
+                <el-input v-model="keyword" placeholder="请输入..."></el-input>
             </el-form-item>
             <el-form-item>
-                <el-button type="primary">搜索</el-button>
-                <el-button>重置</el-button>
+                <el-button @click="search" :disabled="!keyword" type="primary">搜索</el-button>
+                <el-button @click="reset">重置</el-button>
             </el-form-item>
         </el-form>
     </el-card>
@@ -35,12 +64,12 @@ const handleSizeChange = () => {
         <el-row>
             <el-button type="primary" icon="Plus">添加角色</el-button>
         </el-row>
-        <el-table border>
+        <el-table :data="roleList" border stripe>
             <el-table-column type="index" label="#" align="center"></el-table-column>
-            <el-table-column label="ID" align="center" width="150px"></el-table-column>
-            <el-table-column label="角色名称" align="center" show-overflow-tooltip></el-table-column>
-            <el-table-column label="创建时间" align="center" show-overflow-tooltip></el-table-column>
-            <el-table-column label="更新时间" align="center" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="id" label="ID" align="center" width="150px"></el-table-column>
+            <el-table-column prop="roleName" label="角色名称" align="center" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="createTime" label="创建时间" align="center" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="updateTime" label="更新时间" align="center" show-overflow-tooltip></el-table-column>
             <el-table-column label="操作" align="center">
                 <template #="{ row }">
                     <el-button type="primary">分配权限</el-button>
@@ -54,8 +83,8 @@ const handleSizeChange = () => {
 
         <!-- 分页器 -->
         <el-pagination @current-change="getRoles" @size-change="handleSizeChange" v-model:current-page="currentPage"
-            v-model:page-size="limit" :page-sizes="[10, 20, 30, 40]" background layout="prev, pager, next, ->, sizes, total"
-            :total="total" />
+            v-model:page-size="limit" :page-sizes="[10, 20, 30, 40]" background
+            layout="prev, pager, next, ->, sizes, total" :total="total" />
     </el-card>
 </template>
 
