@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { reqAllRolesList } from '@/api/acl/role';
+import { reqAddOrUpdateRole, reqAllRolesList } from '@/api/acl/role';
 import type { RoleData, RoleResponseData } from '@/api/acl/role/type';
 import useLayoutSettingStore from '@/store/modules/setting';
-import { ref, onMounted } from 'vue'
+import { ElMessage } from 'element-plus';
+import { ref, onMounted, reactive, nextTick } from 'vue'
 
 onMounted(() => {
     getRoles()
@@ -44,16 +45,47 @@ const reset = () => {
     layoutSettingStore.refresh = !layoutSettingStore.refresh// 进行刷新
 }
 
-const dialogVisible = ref(true)
+const dialogVisible = ref(false)
+const roleParams = reactive<RoleData>({ roleName: '' })
 
 // 添加职位
 const addRole = () => {
+    Object.assign(roleParams, { roleName: '', id: '' })// 重置表单
+
+    nextTick(() => {
+        form.value.clearValidate('roleName')// 重置表单校验规则
+    })
     dialogVisible.value = true
 }
 
 // 修改职位
 const editRole = (row: RoleData) => {
+    Object.assign(roleParams, row)// 初始化表单
+    nextTick(() => {
+        form.value.clearValidate('roleName')// 重置表单校验规则
+    })
     dialogVisible.value = true
+}
+
+// 表单校验规则
+const rules = {
+    roleName: [
+        { required: true, message: '请输入职位名称', trigger: 'blur' },
+        { min: 2, message: '职位名称至少为2位', trigger: 'blur' }
+    ]
+}
+
+const form = ref()// 表单
+
+const save = async () => {
+    await form.value.validate()// 表单校验
+    const res = await reqAddOrUpdateRole(roleParams)
+
+    if (res.code === 200) {
+        ElMessage({ type: 'success', message: `${roleParams.id ? '修改' : '添加'}'成功'` })
+        getRoles(roleParams.id ? currentPage.value : 1)// pull data
+        dialogVisible.value = false
+    }
 }
 </script>
 
@@ -99,15 +131,15 @@ const editRole = (row: RoleData) => {
             layout="prev, pager, next, ->, sizes, total" :total="total" />
     </el-card>
 
-    <el-dialog v-model="dialogVisible" title="添加职位" width="30%">
-        <el-form>
-            <el-form-item label="职位名称">
-                <el-input placeholder="请输入..."></el-input>
+    <el-dialog v-model="dialogVisible" :title="`${roleParams.id ? '修改' : '添加'}职位`" width="30%">
+        <el-form ref="form" :model="roleParams" :rules="rules">
+            <el-form-item prop="roleName" label="职位名称">
+                <el-input v-model="roleParams.roleName" placeholder="请输入..."></el-input>
             </el-form-item>
         </el-form>
         <template #footer>
             <el-button @click="dialogVisible = false">取消</el-button>
-            <el-button type="primary">确定</el-button>
+            <el-button @click="save" type="primary">确定</el-button>
         </template>
     </el-dialog>
 </template>
