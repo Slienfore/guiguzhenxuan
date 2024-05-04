@@ -3,8 +3,8 @@ import type { RoleData, RoleResponseData } from './type'
 
 enum API {
     ALL_ROLES_URL = '/admin/acl/role/',// 所有职位接口
-    ADD_ROLE_URL = '/admin/acl/save',// 新增职位
-    UPDATE_ROLE_URL = '/admin/acl/update',// 更新职位
+    ADD_ROLE_URL = '/admin/acl/role/save',// 新增职位
+    UPDATE_ROLE_URL = '/admin/acl/role/update',// 更新职位
 }
 
 // 获取全部职位列表
