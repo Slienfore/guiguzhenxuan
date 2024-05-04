@@ -1,7 +1,7 @@
 <script setup lang="ts" name="Menu">
 import { ref, onMounted, reactive } from 'vue'
 import type { AddOrUpdatePermission, Permission, PermissionList, PermissionResponseData } from '@/api/acl/menu/type'
-import { reqAddOrUpdatePermission, reqAllPermission } from '@/api/acl/menu';
+import { reqAddOrUpdatePermission, reqAllPermission, reqDeletePermission } from '@/api/acl/menu';
 import { ElMessage } from 'element-plus';
 
 const permissionList = ref<PermissionList>([])
@@ -44,6 +44,16 @@ const save = async () => {
         dialogVisible.value = false
     }
 }
+
+// 删除菜单
+const deletePermission = async (id: number) => {
+    const res: any = await reqDeletePermission(id)
+
+    if (res.code === 200) {
+        getPermission()
+        ElMessage({ type: 'success', message: '删除成功' })
+    }
+}
 </script>
 
 <template>
@@ -60,7 +70,11 @@ const save = async () => {
                     : '添加菜单' }}</el-button>
                 <!-- 一级菜单不能够编辑 | 删除 -->
                 <el-button @click="updatePermission(row)" v-if="row.level !== 1" type="warning" icon="Edit"></el-button>
-                <el-button v-if="row.level !== 1" type="danger" icon="Delete"></el-button>
+                <el-popconfirm @confirm="deletePermission(row.id)" title="您确定删除该菜单?">
+                    <template " #reference>
+                        <el-button v-if="row.level !== 1" type="danger" icon="Delete"></el-button>
+                    </template>
+                </el-popconfirm>
             </template>
         </el-table-column>
     </el-table>

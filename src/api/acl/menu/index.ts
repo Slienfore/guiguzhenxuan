@@ -3,8 +3,9 @@ import type { AddOrUpdatePermission, PermissionResponseData } from './type'
 
 enum API {
     PERMISSION_ALL_URL = '/admin/acl/permission',// 获取全部菜单数据
-    ADD_PERMISSION_URL = '/admin/acl/permission/save/',// 添加菜单
+    ADD_PERMISSION_URL = '/admin/acl/permission/save',// 添加菜单
     UPDATE_PERMISSION_URL = '/admin/acl/permission/update',// 更新菜单
+    DELETE_PERMISSION_URL = '/admin/acl/permission/remove/',// 删除已有菜单
 }
 
 // 获取全部菜单数据
@@ -18,3 +19,6 @@ export const reqAddOrUpdatePermission = (data: AddOrUpdatePermission) => {
         return request.post<any, any>(API.ADD_PERMISSION_URL, data)
     }
 }
+
+// 删除菜单
+export const reqDeletePermission = (id: number) => request.delete(API.DELETE_PERMISSION_URL + id)
