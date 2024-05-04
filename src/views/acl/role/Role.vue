@@ -95,6 +95,9 @@ const roleTreeData = ref<PermissionMenuData[]>([])
 // 属性控制配置选线
 // label: 指定节点标签为节点对象的某个属性值, children: 指定子树为节点对象的某个属性值
 const defaultProps = { children: 'children', label: 'name' }
+// 存储属性控制勾选节点的 ID
+const permissionSelectedList = ref<number[]>([])
+
 // 权限分配
 const roleAllocation = async (row: RoleData) => {
     drawer.value = true
@@ -104,7 +107,23 @@ const roleAllocation = async (row: RoleData) => {
 
     if (res.code === 200) {
         roleTreeData.value = res.data
+        permissionSelectedList.value = filterSelectedPermissionTreeList(roleTreeData.value, [])
     }
+}
+
+// 过滤已经选择的权限树形控件的数组
+const filterSelectedPermissionTreeList = (menu: any, initList: any) => {// 递归过滤已选择树形控件
+    menu.forEach((item: any) => {
+        if (item.select && item.level === 4) {// 过滤 4 级选项
+            initList.push(item.id)
+        }
+
+        if (item.children && item.children.length) {// 递归 zi
+            filterSelectedPermissionTreeList(item.children, initList)
+        }
+    })
+
+    return initList
 }
 
 </script>
@@ -165,7 +184,9 @@ const roleAllocation = async (row: RoleData) => {
 
     <el-drawer v-model="drawer" title="权限分配 && 操作按钮分配">
         <template #default>
-            <el-tree :data="roleTreeData" :props="defaultProps" show-checkbox node-key="id" default-expand-all />
+            <el-tree :data="roleTreeData"
+            :default-checked-keys="permissionSelectedList"
+             :props="defaultProps" show-checkbox node-key="id" default-expand-all />
         </template>
         <template #footer>
             <el-button @click="drawer = false">取消</el-button>
