@@ -31,3 +31,23 @@ export interface RoleResponseData extends ResponseData {
     }
 }
 
+// 权限菜单数据
+export interface PermissionMenuData {
+    id: number
+    name: string
+    level: number
+    select: boolean
+    children?: PermissionMenuList
+    type: number
+    code: string
+    status: null
+    createTime: string
+    updateTime: string
+    pid: number
+}
+
+export type PermissionMenuList = PermissionMenuData[]
+
+export interface PermissionMenuResponseData extends ResponseData {
+    data: PermissionMenuList
+}

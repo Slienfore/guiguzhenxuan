@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { reqAddOrUpdateRole, reqAllRolesList } from '@/api/acl/role';
-import type { RoleData, RoleResponseData } from '@/api/acl/role/type';
+import { reqAddOrUpdateRole, reqAllRolesList, reqPermissionRole } from '@/api/acl/role';
+import type { PermissionMenuData, PermissionMenuResponseData, RoleData, RoleResponseData } from '@/api/acl/role/type';
 import useLayoutSettingStore from '@/store/modules/setting';
 import { ElMessage } from 'element-plus';
 import { ref, onMounted, reactive, nextTick } from 'vue'
@@ -87,6 +87,26 @@ const save = async () => {
         dialogVisible.value = false
     }
 }
+
+// 权限分配抽屉
+const drawer = ref(false)
+// 权限分配树形控件
+const roleTreeData = ref<PermissionMenuData[]>([])
+// 属性控制配置选线
+// label: 指定节点标签为节点对象的某个属性值, children: 指定子树为节点对象的某个属性值
+const defaultProps = { children: 'children', label: 'name' }
+// 权限分配
+const roleAllocation = async (row: RoleData) => {
+    drawer.value = true
+    Object.assign(roleParams, row)
+    // 获取当前职位的权限菜单
+    const res: PermissionMenuResponseData = await reqPermissionRole(row.id as number)
+
+    if (res.code === 200) {
+        roleTreeData.value = res.data
+    }
+}
+
 </script>
 
 <template>
@@ -116,7 +136,7 @@ const save = async () => {
             <el-table-column prop="updateTime" label="更新时间" align="center" show-overflow-tooltip></el-table-column>
             <el-table-column label="操作" align="center">
                 <template #="{ row }">
-                    <el-button type="primary">分配权限</el-button>
+                    <el-button @click="roleAllocation(row)" type="primary">分配权限</el-button>
                     <el-button @click="editRole(row)" title="编辑" type="warning" icon="Edit"></el-button>
                     <el-button title="删除" type="danger" icon="Delete"></el-button>
                 </template>
@@ -142,6 +162,16 @@ const save = async () => {
             <el-button @click="save" type="primary">确定</el-button>
         </template>
     </el-dialog>
+
+    <el-drawer v-model="drawer" title="权限分配 && 操作按钮分配">
+        <template #default>
+            <el-tree :data="roleTreeData" :props="defaultProps" show-checkbox node-key="id" default-expand-all />
+        </template>
+        <template #footer>
+            <el-button @click="drawer = false">取消</el-button>
+            <el-button type="primary">确定</el-button>
+        </template>
+    </el-drawer>
 </template>
 
 <style scoped lang="scss">
