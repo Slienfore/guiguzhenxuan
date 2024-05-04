@@ -6,6 +6,7 @@ enum API {
     ADD_ROLE_URL = '/admin/acl/role/save',// 新增职位
     UPDATE_ROLE_URL = '/admin/acl/role/update',// 更新职位
     PERMISSION_ROLE_URL = '/admin/acl/permission/toAssign/',// 获取用户权限
+    ALLOCATE_ROLE_URL = '/admin/acl/permission/doAssign/?',// 分配权限
 }
 
 // 获取全部职位列表
@@ -22,3 +23,6 @@ export const reqAddOrUpdateRole = (data: RoleData) => {
 
 // 根据职位ID获取权限
 export const reqPermissionRole = (roleId: number) => request.get<any, PermissionMenuResponseData>(API.PERMISSION_ROLE_URL + roleId)
+
+// 分配权限
+export const reqAllocateRole = (roleId: number, permissionId: number[]) => request.post(API.ALLOCATE_ROLE_URL +`roleId=${roleId}&permissionId=${permissionId}`)

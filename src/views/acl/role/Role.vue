@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reqAddOrUpdateRole, reqAllRolesList, reqPermissionRole } from '@/api/acl/role';
+import { reqAddOrUpdateRole, reqAllRolesList, reqAllocateRole, reqPermissionRole } from '@/api/acl/role';
 import type { PermissionMenuData, PermissionMenuResponseData, RoleData, RoleResponseData } from '@/api/acl/role/type';
 import useLayoutSettingStore from '@/store/modules/setting';
 import { ElMessage } from 'element-plus';
@@ -126,6 +126,28 @@ const filterSelectedPermissionTreeList = (menu: any, initList: any) => {// 递�
     return initList
 }
 
+const tree = ref()// 属性控件
+// 分配权限
+const handleAllocateRoles = async () => {
+    // 职位 ID
+    const roleId = <number>roleParams.id
+    // 选中的 子节点
+    const selectedIds = tree.value.getCheckedKeys()
+    // 子节点上一层的父节点 -> 即 处于半选状态的节点
+    const halfSelectedIds = tree.value.getHalfCheckedKeys()
+
+    const ids = selectedIds.concat(halfSelectedIds)// 合并
+
+    const res: any = await reqAllocateRole(roleId, ids)
+    console.log(res)
+    if (res.code === 200) {
+        drawer.value = false
+        ElMessage({ type: 'success', message: '分配成功' })
+        // 防止赋予自己权限, 权限未刷新
+        window.location.reload()// 整体刷新
+    }
+}
+
 </script>
 
 <template>
@@ -184,13 +206,12 @@ const filterSelectedPermissionTreeList = (menu: any, initList: any) => {// 递�
 
     <el-drawer v-model="drawer" title="权限分配 && 操作按钮分配">
         <template #default>
-            <el-tree :data="roleTreeData"
-            :default-checked-keys="permissionSelectedList"
-             :props="defaultProps" show-checkbox node-key="id" default-expand-all />
+            <el-tree ref="tree" :data="roleTreeData" :default-checked-keys="permissionSelectedList"
+                :props="defaultProps" show-checkbox node-key="id" default-expand-all />
         </template>
         <template #footer>
             <el-button @click="drawer = false">取消</el-button>
-            <el-button type="primary">确定</el-button>
+            <el-button @click="handleAllocateRoles" type="primary">确定</el-button>
         </template>
     </el-drawer>
 </template>
