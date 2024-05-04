@@ -40,15 +40,23 @@ const darkModeChange = () => {
   dark.value ? html.className = 'dark' : html.className = ''// 追加暗黑模式
 }
 
+const themeColor = ref('rgba(64, 158, 255)')
+// 主题颜色设置
+const themeColorChange = () => {
+  console.log(themeColor.value)
+  const html = document.documentElement// 通过 property 进行设置 var 变量属性
+  html.style.setProperty('--el-color-primary', themeColor.value)
+}
+
 </script>
 
 <template>
   <el-button @click="updateRefresh" icon="Refresh" size="small" circle />
   <el-button @click="fullScreen" icon="FullScreen" size="small" circle />
-  <el-popover title="主题设置" width="250" trigger="hover">
+  <el-popover title="主题设置" width="250" trigger="click">
     <el-form>
       <el-form-item label="主题颜色">
-        <el-color-picker size="small" />
+        <el-color-picker @change="themeColorChange" v-model="themeColor" size="small" />
       </el-form-item>
       <el-form-item label="暗黑模式">
         <el-switch @change="darkModeChange" v-model="dark" size="small" inline-prompt inactive-icon="Sunrise"
