@@ -53,7 +53,7 @@ const themeColorChange = () => {
 <template>
   <el-button @click="updateRefresh" icon="Refresh" size="small" circle />
   <el-button @click="fullScreen" icon="FullScreen" size="small" circle />
-  <el-popover title="主题设置" width="250" trigger="click">
+  <el-popover title="主题设置" width="250" trigger="hover">
     <el-form>
       <el-form-item label="主题颜色">
         <el-color-picker @change="themeColorChange" v-model="themeColor" size="small" />
