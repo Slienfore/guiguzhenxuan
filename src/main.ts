@@ -8,6 +8,7 @@ import 'virtual:svg-icons-register'// 引入 svg 图标
 import '@/style/index.scss'// 引入全局CSS样式
 import router from '@/router'// router
 import pinia from '@/store'// pinia 数据管理
+import 'element-plus/theme-chalk/dark/css-vars.css'// 暗黑模式
 
 const app = createApp(App)
 
