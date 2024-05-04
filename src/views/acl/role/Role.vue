@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reqAddOrUpdateRole, reqAllRolesList, reqAllocateRole, reqPermissionRole } from '@/api/acl/role';
+import { reqAddOrUpdateRole, reqAllRolesList, reqAllocateRole, reqDeleteRole, reqPermissionRole } from '@/api/acl/role';
 import type { PermissionMenuData, PermissionMenuResponseData, RoleData, RoleResponseData } from '@/api/acl/role/type';
 import useLayoutSettingStore from '@/store/modules/setting';
 import { ElMessage } from 'element-plus';
@@ -139,12 +139,21 @@ const handleAllocateRoles = async () => {
     const ids = selectedIds.concat(halfSelectedIds)// 合并
 
     const res: any = await reqAllocateRole(roleId, ids)
-    console.log(res)
     if (res.code === 200) {
         drawer.value = false
         ElMessage({ type: 'success', message: '分配成功' })
         // 防止赋予自己权限, 权限未刷新
         window.location.reload()// 整体刷新
+    }
+}
+
+// 删除职位
+const deleteRole = async (roleId: number) => {
+    const res = await reqDeleteRole(roleId)
+
+    if (res.code === 200) {
+        ElMessage({ type: 'success', message: '删除成功' })
+        getRoles(roleList.value.length > 1 ? currentPage.value : currentPage.value - 1)
     }
 }
 
@@ -179,7 +188,11 @@ const handleAllocateRoles = async () => {
                 <template #="{ row }">
                     <el-button @click="roleAllocation(row)" type="primary">分配权限</el-button>
                     <el-button @click="editRole(row)" title="编辑" type="warning" icon="Edit"></el-button>
-                    <el-button title="删除" type="danger" icon="Delete"></el-button>
+                    <el-popconfirm @confirm="deleteRole(row.id)" title="您确定删除该职位?">
+                        <template #reference>
+                            <el-button title="删除" type="danger" icon="Delete"></el-button>
+                        </template>
+                    </el-popconfirm>
                 </template>
             </el-table-column>
         </el-table>
