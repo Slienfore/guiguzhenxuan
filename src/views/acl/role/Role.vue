@@ -43,6 +43,18 @@ const layoutSettingStore = useLayoutSettingStore()
 const reset = () => {
     layoutSettingStore.refresh = !layoutSettingStore.refresh// 进行刷新
 }
+
+const dialogVisible = ref(true)
+
+// 添加职位
+const addRole = () => {
+    dialogVisible.value = true
+}
+
+// 修改职位
+const editRole = (row: RoleData) => {
+    dialogVisible.value = true
+}
 </script>
 
 <template>
@@ -62,7 +74,7 @@ const reset = () => {
 
     <el-card>
         <el-row>
-            <el-button type="primary" icon="Plus">添加角色</el-button>
+            <el-button @click="addRole" type="primary" icon="Plus" style="margin-bottom: 16px;">添加职位</el-button>
         </el-row>
         <el-table :data="roleList" border stripe>
             <el-table-column type="index" label="#" align="center"></el-table-column>
@@ -73,7 +85,7 @@ const reset = () => {
             <el-table-column label="操作" align="center">
                 <template #="{ row }">
                     <el-button type="primary">分配权限</el-button>
-                    <el-button title="编辑" type="warning" icon="Edit"></el-button>
+                    <el-button @click="editRole(row)" title="编辑" type="warning" icon="Edit"></el-button>
                     <el-button title="删除" type="danger" icon="Delete"></el-button>
                 </template>
             </el-table-column>
@@ -86,6 +98,18 @@ const reset = () => {
             v-model:page-size="limit" :page-sizes="[10, 20, 30, 40]" background
             layout="prev, pager, next, ->, sizes, total" :total="total" />
     </el-card>
+
+    <el-dialog v-model="dialogVisible" title="添加职位" width="30%">
+        <el-form>
+            <el-form-item label="职位名称">
+                <el-input placeholder="请输入..."></el-input>
+            </el-form-item>
+        </el-form>
+        <template #footer>
+            <el-button @click="dialogVisible = false">取消</el-button>
+            <el-button type="primary">确定</el-button>
+        </template>
+    </el-dialog>
 </template>
 
 <style scoped lang="scss">
