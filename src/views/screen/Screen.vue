@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import Top from './components/top/Top.vue'
+import Tourist from './components/tourist/Tourist.vue'
+import Age from './components/age/Age.vue'
+import Sex from './components/sex/Sex.vue'
+
 // 数据大屏
 const screen = ref()
 
@@ -33,7 +37,11 @@ const getScale = (w = 1920, h = 1080) => {// 设计稿默认值
             </div>
             <!-- 底部 -->
             <div class="bottom">
-                <div class="left"></div>
+                <div class="left">
+                    <Tourist class="tourist"></Tourist>
+                    <Sex class="sex"></Sex>
+                    <Age class="age"></Age>
+                </div>
                 <div class="center"></div>
                 <div class="right"></div>
             </div>
@@ -66,8 +74,21 @@ const getScale = (w = 1920, h = 1080) => {// 设计稿默认值
 
             .left {
                 flex: 1;
+                height: 1040px;
+                display: flex;
+                flex-direction: column;
 
+                .tourist {
+                    flex: 1.5;
+                }
 
+                .sex {
+                    flex: 2;
+                }
+
+                .age {
+                    flex: 1;
+                }
             }
 
             .center {
