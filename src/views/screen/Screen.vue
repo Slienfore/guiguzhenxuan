@@ -6,6 +6,9 @@ import Age from './components/age/Age.vue'
 import Sex from './components/sex/Sex.vue'
 import Map from './components/map/Map.vue'
 import Line from './components/line/Line.vue'
+import Rank from './components/rank/Rank.vue'
+import Year from './components/year/Year.vue'
+import Couter from './components/couter/Couter.vue'
 
 // 数据大屏
 const screen = ref()
@@ -48,7 +51,11 @@ const getScale = (w = 1920, h = 1080) => {// 设计稿默认值
                     <Map class="map"></Map>
                     <Line class="line"></Line>
                 </div>
-                <div class="right"></div>
+                <div class="right">
+                    <Rank class="rank"></Rank>
+                    <Year class="year"></Year>
+                    <Couter class="counter"></Couter>
+                </div>
             </div>
         </div>
     </div>
@@ -113,6 +120,22 @@ const getScale = (w = 1920, h = 1080) => {// 设计稿默认值
 
             .right {
                 flex: 1;
+                display: flex;
+                flex-direction: column;
+                margin-left: 40px;
+
+                .rank {
+                    flex: 1.5;
+                }
+
+                .year {
+                    flex: 1;
+
+                }
+
+                .count {
+                    flex: 1;
+                }
             }
         }
     }
