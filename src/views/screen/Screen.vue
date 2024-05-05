@@ -4,6 +4,8 @@ import Top from './components/top/Top.vue'
 import Tourist from './components/tourist/Tourist.vue'
 import Age from './components/age/Age.vue'
 import Sex from './components/sex/Sex.vue'
+import Map from './components/map/Map.vue'
+import Line from './components/line/Line.vue'
 
 // 数据大屏
 const screen = ref()
@@ -42,7 +44,10 @@ const getScale = (w = 1920, h = 1080) => {// 设计稿默认值
                     <Sex class="sex"></Sex>
                     <Age class="age"></Age>
                 </div>
-                <div class="center"></div>
+                <div class="center">
+                    <Map class="map"></Map>
+                    <Line class="line"></Line>
+                </div>
                 <div class="right"></div>
             </div>
         </div>
@@ -93,6 +98,17 @@ const getScale = (w = 1920, h = 1080) => {// 设计稿默认值
 
             .center {
                 flex: 2;
+                flex: 1.5;
+                display: flex;
+                flex-direction: column;
+
+                .map {
+                    flex: 4;
+                }
+
+                .line {
+                    flex: 1;
+                }
             }
 
             .right {
